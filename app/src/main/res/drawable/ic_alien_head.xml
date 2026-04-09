@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Elongated Grey Head -->
+    <path
+        android:fillColor="#CCCCCC"
+        android:strokeColor="#000000"
+        android:strokeWidth="0.5"
+        android:pathData="M12,2C8,2 4.5,5.5 4.5,10.5C4.5,15.5 10,21.5 12,21.5C14,21.5 19.5,15.5 19.5,10.5C19.5,5.5 16,2 12,2Z" />
+    <!-- Slanted Left Eye (Screaming style) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M7,9c0,0 2,1 4,3c0,1 -1,2 -3,1C7,12 7,10 7,9Z" />
+    <!-- Slanted Right Eye (Screaming style) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M17,9c0,0 -2,1 -4,3c0,1 1,2 3,1C17,12 17,10 17,9Z" />
+    <!-- Nostrils -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M10.5,14.5h1v1h-1z M12.5,14.5h1v1h-1z" />
+    <!-- Large Screaming Mouth -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M12,18.5m-2.5,0a2.5,2.5 0 1,1 5,0a2.5,2.5 0 1,1 -5,0" />
+</vector>
