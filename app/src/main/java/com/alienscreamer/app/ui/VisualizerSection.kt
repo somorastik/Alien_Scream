@@ -88,6 +88,25 @@ fun Visualizer(
 
 @Composable
 fun OscilloscopeCanvas(waveform: FloatArray) {
+    // Find zero-crossing to stabilize the display
+    val triggeredWaveform = remember(waveform) {
+        var triggerIndex = 0
+        // Look for a zero crossing (positive slope) in the first half of the buffer
+        for (i in 1 until waveform.size / 2) {
+            if (waveform[i - 1] < 0 && waveform[i] >= 0) {
+                triggerIndex = i
+                break
+            }
+        }
+        // Return a slice starting from the trigger index
+        val displaySize = waveform.size / 2
+        if (triggerIndex + displaySize <= waveform.size) {
+            waveform.copyOfRange(triggerIndex, triggerIndex + displaySize)
+        } else {
+            waveform.copyOfRange(0, displaySize)
+        }
+    }
+
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,10 +132,10 @@ fun OscilloscopeCanvas(waveform: FloatArray) {
             strokeWidth = 2f
         )
 
-        if (waveform.isEmpty()) return@Canvas
+        if (triggeredWaveform.isEmpty()) return@Canvas
 
-        val pathPoints = waveform.mapIndexed { index, sample ->
-            val x = index.toFloat() / (waveform.size - 1).coerceAtLeast(1) * size.width
+        val pathPoints = triggeredWaveform.mapIndexed { index, sample ->
+            val x = index.toFloat() / (triggeredWaveform.size - 1).coerceAtLeast(1) * size.width
             val y = ((1f - ((sample.coerceIn(-1f, 1f) + 1f) / 2f)) * size.height)
             Offset(x, y)
         }

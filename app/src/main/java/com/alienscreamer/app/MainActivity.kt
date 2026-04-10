@@ -82,7 +82,9 @@ private fun AlienScreamerApp() {
     var lfoFrequencyModAmount by remember { mutableFloatStateOf(0f) }
     var lfoFrequencyModEnabled by remember { mutableStateOf(false) }
     var hardClippingEnabled by remember { mutableStateOf(false) }
-    var hardClippingThreshold by remember { mutableFloatStateOf(0.1f) }
+    var delayEnabled by remember { mutableStateOf(false) }
+    var reverbEnabled by remember { mutableStateOf(false) }
+    var hardClippingAmount by remember { mutableFloatStateOf(0.5f) }
     var volume by remember { 
         mutableFloatStateOf(
             audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() / maxSystemVolume.coerceAtLeast(1)
@@ -99,7 +101,7 @@ private fun AlienScreamerApp() {
         }
     }
 
-    LaunchedEffect(vcoFrequency, lfoDepth, lfoDepthModAmount, lfoDepthModEnabled, lfoFrequency, lfoFrequencyModAmount, lfoFrequencyModEnabled, hardClippingEnabled, hardClippingThreshold, volume, waveShape) {
+    LaunchedEffect(vcoFrequency, lfoDepth, lfoDepthModAmount, lfoDepthModEnabled, lfoFrequency, lfoFrequencyModAmount, lfoFrequencyModEnabled, hardClippingEnabled, hardClippingAmount, delayEnabled, reverbEnabled, volume, waveShape) {
         engine.vcoFrequencyHz = vcoFrequency
         engine.lfoDepthHz = lfoDepth
         engine.lfoDepthModAmount = lfoDepthModAmount
@@ -108,7 +110,9 @@ private fun AlienScreamerApp() {
         engine.lfoFrequencyModAmount = lfoFrequencyModAmount
         engine.lfoFrequencyModEnabled = lfoFrequencyModEnabled
         engine.hardClippingEnabled = hardClippingEnabled
-        engine.hardClippingThreshold = hardClippingThreshold
+        engine.hardClippingAmount = hardClippingAmount
+        engine.delayEnabled = delayEnabled
+        engine.reverbEnabled = reverbEnabled
         engine.volume = volume
         engine.waveShape = waveShape
     }
@@ -129,8 +133,9 @@ private fun AlienScreamerApp() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_alien_head),
@@ -144,6 +149,13 @@ private fun AlienScreamerApp() {
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFC8FFE2)
+            )
+            Image(
+                painter = painterResource(id = R.drawable.ic_alien_head),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .size(64.dp)
+                    .background(Color(0xFF07110C), RoundedCornerShape(8.dp))
             )
         }
 
@@ -193,7 +205,9 @@ private fun AlienScreamerApp() {
         OutputProcessingSection(
             volume = volume,
             hardClippingEnabled = hardClippingEnabled,
-            hardClippingThreshold = hardClippingThreshold,
+            hardClippingAmount = hardClippingAmount,
+            delayEnabled = delayEnabled,
+            reverbEnabled = reverbEnabled,
             onVolumeChange = { 
                 volume = it
                 audioManager.setStreamVolume(
@@ -203,7 +217,9 @@ private fun AlienScreamerApp() {
                 )
             },
             onHardClippingChange = { hardClippingEnabled = it },
-            onHardClippingThresholdChange = { hardClippingThreshold = it }
+            onHardClippingAmountChange = { hardClippingAmount = it },
+            onDelayChange = { delayEnabled = it },
+            onReverbChange = { reverbEnabled = it }
         )
     }
 }
@@ -271,10 +287,14 @@ private fun ModulatableSliderRow(
 private fun OutputProcessingSection(
     volume: Float,
     hardClippingEnabled: Boolean,
-    hardClippingThreshold: Float,
+    hardClippingAmount: Float,
+    delayEnabled: Boolean,
+    reverbEnabled: Boolean,
     onVolumeChange: (Float) -> Unit,
     onHardClippingChange: (Boolean) -> Unit,
-    onHardClippingThresholdChange: (Float) -> Unit
+    onHardClippingAmountChange: (Float) -> Unit,
+    onDelayChange: (Boolean) -> Unit,
+    onReverbChange: (Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -321,12 +341,12 @@ private fun OutputProcessingSection(
         ) {
             Column {
                 Text(
-                    text = "Hard Clipping",
+                    text = "Distortion",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFFE3FFF0)
                 )
                 Text(
-                    text = "Aggressive digital clip",
+                    text = "Hard diode-style clip",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF9DD9B5)
                 )
@@ -341,12 +361,57 @@ private fun OutputProcessingSection(
         if (hardClippingEnabled) {
             SynthSlider(
                 label = "Clipping Depth",
-                value = 0.25f - hardClippingThreshold, // Invert for intuitive "depth"
-                range = 0.05f..0.24f,
-                unit = "",
-                onValueChange = { onHardClippingThresholdChange(0.25f - it) },
+                value = hardClippingAmount * 100f,
+                range = 0f..100f,
+                unit = "%",
+                onValueChange = { onHardClippingAmountChange(it / 100f) },
                 compact = true
             )
         }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            EffectToggle(
+                label = "Delay",
+                enabled = delayEnabled,
+                onToggle = onDelayChange,
+                modifier = Modifier.weight(1f)
+            )
+            EffectToggle(
+                label = "Reverb",
+                enabled = reverbEnabled,
+                onToggle = onReverbChange,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EffectToggle(
+    label: String,
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .background(Color(0xFF0D1913), RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (enabled) Color(0xFF7CFFD0) else Color(0xFF9DD9B5)
+        )
+        Switch(
+            checked = enabled,
+            onCheckedChange = onToggle,
+            modifier = Modifier.scale(0.7f)
+        )
     }
 }

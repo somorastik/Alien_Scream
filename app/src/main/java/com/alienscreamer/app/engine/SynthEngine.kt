@@ -43,7 +43,13 @@ class SynthEngine {
     var hardClippingEnabled: Boolean = false
 
     @Volatile
-    var hardClippingThreshold: Float = 0.1f
+    var hardClippingAmount: Float = 0.5f
+
+    @Volatile
+    var delayEnabled: Boolean = false
+
+    @Volatile
+    var reverbEnabled: Boolean = false
 
     @Volatile
     var volume: Float = 0.7f
@@ -117,27 +123,54 @@ class SynthEngine {
         var lfoPhase = 0.0
         var modLfoPhase = 0.0
 
+        // Delay line: 0.5s at 44.1kHz = ~22050 samples
+        val delayBuffer = FloatArray(SAMPLE_RATE / 2)
+        var delayWriteIndex = 0
+
+        // Advanced Reverb: Multiple parallel comb filters and all-pass filters (Schroeder)
+        val comb1 = FloatArray(1116)
+        val comb2 = FloatArray(1188)
+        val comb3 = FloatArray(1277)
+        val comb4 = FloatArray(1356)
+        val allpass1 = FloatArray(225)
+        val allpass2 = FloatArray(556)
+        
+        var c1Idx = 0; var c2Idx = 0; var c3Idx = 0; var c4Idx = 0
+        var ap1Idx = 0; var ap2Idx = 0
+
+        val radiansPerSample = 2.0 * PI / SAMPLE_RATE
+        val modLfoFreqStep = 0.5 * radiansPerSample
+
         try {
             while (running) {
+                // Snapshot parameters...
+                val baseFreq = vcoFrequencyHz
+                val baseLfoDepth = lfoDepthHz
+                val baseLfoFreq = lfoFrequencyHz
+                val lfoDModAmt = lfoDepthModAmount
+                val lfoFModAmt = lfoFrequencyModAmount
+                val lfoDModEnabled = lfoDepthModEnabled
+                val lfoFModEnabled = lfoFrequencyModEnabled
+                val clipEnabled = hardClippingEnabled
+                val clipAmt = hardClippingAmount.toDouble()
+                val dEnabled = delayEnabled
+                val rEnabled = reverbEnabled
+                val engineVolume = volume
+                val currentWaveShape = waveShape
+
                 val scopeBuffer = FloatArray(BUFFER_SAMPLES)
+                val threshold = if (clipEnabled) 0.25 * (1.0 - clipAmt * 0.96).coerceAtLeast(0.01) else 0.25
+                val compensation = if (clipEnabled) Math.sqrt(0.25 / threshold) else 1.0
+
                 for (i in 0 until BUFFER_SAMPLES) {
-                    val modLfoValue = sin(modLfoPhase) // -1.0 to 1.0
-
-                    var currentLfoDepth = lfoDepthHz
-                    if (lfoDepthModEnabled) {
-                        currentLfoDepth += (modLfoValue * lfoDepthModAmount).toFloat()
-                    }
-
-                    var currentLfoFrequency = lfoFrequencyHz
-                    if (lfoFrequencyModEnabled) {
-                        currentLfoFrequency += (modLfoValue * lfoFrequencyModAmount).toFloat()
-                    }
+                    val modLfoValue = sin(modLfoPhase)
+                    val currentLfoDepth = if (lfoDModEnabled) baseLfoDepth + (modLfoValue * lfoDModAmt).toFloat() else baseLfoDepth
+                    var currentLfoFrequency = if (lfoFModEnabled) baseLfoFreq + (modLfoValue * lfoFModAmt).toFloat() else baseLfoFreq
                     currentLfoFrequency = maxOf(0.1f, currentLfoFrequency)
-
                     val lfoValue = sin(lfoPhase) * currentLfoDepth
-                    val frequency = maxOf(10f, vcoFrequencyHz + lfoValue.toFloat()).toDouble()
+                    val frequency = maxOf(10f, baseFreq + lfoValue.toFloat()).toDouble()
                     
-                    val rawSample = when (waveShape) {
+                    val rawSample = when (currentWaveShape) {
                         WaveShape.SINE -> sin(carrierPhase)
                         WaveShape.TRIANGLE -> {
                             val p = carrierPhase / (2.0 * PI)
@@ -148,20 +181,50 @@ class SynthEngine {
                     }
 
                     var sample = rawSample * 0.25
-                    if (hardClippingEnabled) {
-                        val threshold = hardClippingThreshold.toDouble()
-                        sample = if (sample > threshold) threshold else if (sample < -threshold) -threshold else sample
-                        sample *= (0.3 / threshold) // Compensate for level loss
+                    if (clipEnabled) {
+                        if (sample > threshold) sample = threshold else if (sample < -threshold) sample = -threshold
+                        sample *= compensation
                     }
 
-                    val finalSample = sample * volume
+                    if (dEnabled) {
+                        val readIndex = (delayWriteIndex - (SAMPLE_RATE / 3) + delayBuffer.size) % delayBuffer.size
+                        val delayedSample = delayBuffer[readIndex]
+                        delayBuffer[delayWriteIndex] = (sample + delayedSample * 0.5).toFloat()
+                        delayWriteIndex = (delayWriteIndex + 1) % delayBuffer.size
+                        sample += delayedSample.toDouble() * 0.4
+                    }
 
-                    scopeBuffer[i] = finalSample.toFloat()
-                    pcmBuffer[i] = (finalSample * Short.MAX_VALUE).roundToInt().toShort()
+                    if (rEnabled) {
+                        val dry = sample
+                        // Parallel Comb Filters
+                        val outC1 = comb1[c1Idx].toDouble(); comb1[c1Idx] = (dry + outC1 * 0.841).toFloat(); c1Idx = (c1Idx + 1) % comb1.size
+                        val outC2 = comb2[c2Idx].toDouble(); comb2[c2Idx] = (dry + outC2 * 0.815).toFloat(); c2Idx = (c2Idx + 1) % comb2.size
+                        val outC3 = comb3[c3Idx].toDouble(); comb3[c3Idx] = (dry + outC3 * 0.796).toFloat(); c3Idx = (c3Idx + 1) % comb3.size
+                        val outC4 = comb4[c4Idx].toDouble(); comb4[c4Idx] = (dry + outC4 * 0.771).toFloat(); c4Idx = (c4Idx + 1) % comb4.size
+                        
+                        var verb = (outC1 + outC2 + outC3 + outC4) * 0.25
+                        
+                        // All-pass filters for diffusion
+                        val ap1In = verb
+                        verb = -0.5 * ap1In + allpass1[ap1Idx]
+                        allpass1[ap1Idx] = (ap1In + 0.5 * verb).toFloat()
+                        ap1Idx = (ap1Idx + 1) % allpass1.size
+                        
+                        val ap2In = verb
+                        verb = -0.5 * ap2In + allpass2[ap2Idx]
+                        allpass2[ap2Idx] = (ap2In + 0.5 * verb).toFloat()
+                        ap2Idx = (ap2Idx + 1) % allpass2.size
+                        
+                        sample = dry * 0.7 + verb * 0.3
+                    }
 
-                    carrierPhase = wrapPhase(carrierPhase + (2.0 * PI * frequency / SAMPLE_RATE))
-                    lfoPhase = wrapPhase(lfoPhase + (2.0 * PI * currentLfoFrequency / SAMPLE_RATE))
-                    modLfoPhase = wrapPhase(modLfoPhase + (2.0 * PI * 0.5 / SAMPLE_RATE)) // Fixed 0.5Hz for secondary LFO
+                    val finalSample = (sample * engineVolume).toFloat()
+                    scopeBuffer[i] = finalSample
+                    pcmBuffer[i] = (finalSample * Short.MAX_VALUE).toInt().toShort()
+
+                    carrierPhase = (carrierPhase + frequency * radiansPerSample) % (2.0 * PI)
+                    lfoPhase = (lfoPhase + currentLfoFrequency * radiansPerSample) % (2.0 * PI)
+                    modLfoPhase = (modLfoPhase + modLfoFreqStep) % (2.0 * PI)
                 }
 
                 latestWaveform = scopeBuffer
