@@ -82,6 +82,7 @@ private fun AlienScreamerApp() {
     var lfoFrequencyModAmount by remember { mutableFloatStateOf(0f) }
     var lfoFrequencyModEnabled by remember { mutableStateOf(false) }
     var hardClippingEnabled by remember { mutableStateOf(false) }
+    var hardClippingThreshold by remember { mutableFloatStateOf(0.1f) }
     var volume by remember { 
         mutableFloatStateOf(
             audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() / maxSystemVolume.coerceAtLeast(1)
@@ -98,7 +99,7 @@ private fun AlienScreamerApp() {
         }
     }
 
-    LaunchedEffect(vcoFrequency, lfoDepth, lfoDepthModAmount, lfoDepthModEnabled, lfoFrequency, lfoFrequencyModAmount, lfoFrequencyModEnabled, hardClippingEnabled, volume, waveShape) {
+    LaunchedEffect(vcoFrequency, lfoDepth, lfoDepthModAmount, lfoDepthModEnabled, lfoFrequency, lfoFrequencyModAmount, lfoFrequencyModEnabled, hardClippingEnabled, hardClippingThreshold, volume, waveShape) {
         engine.vcoFrequencyHz = vcoFrequency
         engine.lfoDepthHz = lfoDepth
         engine.lfoDepthModAmount = lfoDepthModAmount
@@ -107,6 +108,7 @@ private fun AlienScreamerApp() {
         engine.lfoFrequencyModAmount = lfoFrequencyModAmount
         engine.lfoFrequencyModEnabled = lfoFrequencyModEnabled
         engine.hardClippingEnabled = hardClippingEnabled
+        engine.hardClippingThreshold = hardClippingThreshold
         engine.volume = volume
         engine.waveShape = waveShape
     }
@@ -191,6 +193,7 @@ private fun AlienScreamerApp() {
         OutputProcessingSection(
             volume = volume,
             hardClippingEnabled = hardClippingEnabled,
+            hardClippingThreshold = hardClippingThreshold,
             onVolumeChange = { 
                 volume = it
                 audioManager.setStreamVolume(
@@ -199,7 +202,8 @@ private fun AlienScreamerApp() {
                     0
                 )
             },
-            onHardClippingChange = { hardClippingEnabled = it }
+            onHardClippingChange = { hardClippingEnabled = it },
+            onHardClippingThresholdChange = { hardClippingThreshold = it }
         )
     }
 }
@@ -267,8 +271,10 @@ private fun ModulatableSliderRow(
 private fun OutputProcessingSection(
     volume: Float,
     hardClippingEnabled: Boolean,
+    hardClippingThreshold: Float,
     onVolumeChange: (Float) -> Unit,
-    onHardClippingChange: (Boolean) -> Unit
+    onHardClippingChange: (Boolean) -> Unit,
+    onHardClippingThresholdChange: (Float) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -304,7 +310,7 @@ private fun OutputProcessingSection(
                 value = volume,
                 onValueChange = onVolumeChange,
                 valueRange = 0f..1f,
-                modifier = Modifier.height(32.dp)
+                modifier = Modifier.height(24.dp)
             )
         }
 
@@ -327,7 +333,19 @@ private fun OutputProcessingSection(
             }
             Switch(
                 checked = hardClippingEnabled,
-                onCheckedChange = onHardClippingChange
+                onCheckedChange = onHardClippingChange,
+                modifier = Modifier.scale(0.8f)
+            )
+        }
+
+        if (hardClippingEnabled) {
+            SynthSlider(
+                label = "Clipping Depth",
+                value = 0.25f - hardClippingThreshold, // Invert for intuitive "depth"
+                range = 0.05f..0.24f,
+                unit = "",
+                onValueChange = { onHardClippingThresholdChange(0.25f - it) },
+                compact = true
             )
         }
     }

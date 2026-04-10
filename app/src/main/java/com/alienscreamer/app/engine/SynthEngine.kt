@@ -43,6 +43,9 @@ class SynthEngine {
     var hardClippingEnabled: Boolean = false
 
     @Volatile
+    var hardClippingThreshold: Float = 0.1f
+
+    @Volatile
     var volume: Float = 0.7f
 
     @Volatile
@@ -146,8 +149,9 @@ class SynthEngine {
 
                     var sample = rawSample * 0.25
                     if (hardClippingEnabled) {
-                        sample = if (sample > 0.1) 0.1 else if (sample < -0.1) -0.1 else sample
-                        sample *= 3.0 // Compensate for level loss
+                        val threshold = hardClippingThreshold.toDouble()
+                        sample = if (sample > threshold) threshold else if (sample < -threshold) -threshold else sample
+                        sample *= (0.3 / threshold) // Compensate for level loss
                     }
 
                     val finalSample = sample * volume
