@@ -10,6 +10,7 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.DataLine
 import javax.sound.sampled.SourceDataLine
 import javax.swing.BorderFactory
+import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JFrame
 import javax.swing.JLabel
@@ -227,8 +228,25 @@ private fun createUi(
     lfoFreq: LfoFrequencyModule,
     distortion: DistortionModule
 ) {
-    val frame = JFrame("Alien Screamer")
+    val frame = JFrame("Alien Scream")
     frame.defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
+
+    val headerPanel = JPanel(BorderLayout()).apply {
+        background = Color(7, 17, 12)
+        border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        val titleLabel = JLabel("Alien Scream", SwingConstants.LEFT).apply {
+            foreground = Color(200, 255, 226)
+            font = font.deriveFont(java.awt.Font.BOLD, 18f)
+        }
+        val exitButton = JButton("X").apply {
+            foreground = Color.WHITE
+            background = Color(80, 20, 20)
+            isFocusable = false
+            addActionListener { System.exit(0) }
+        }
+        add(titleLabel, BorderLayout.WEST)
+        add(exitButton, BorderLayout.EAST)
+    }
 
     val controls = JPanel(GridLayout(3, 1, 12, 12)).apply {
         border = BorderFactory.createEmptyBorder(12, 12, 12, 12)
@@ -276,8 +294,9 @@ private fun createUi(
         add(distortionSwitch, BorderLayout.SOUTH)
     }
 
+    frame.add(headerPanel, BorderLayout.NORTH)
     frame.add(centerPanel, BorderLayout.CENTER)
-    frame.setSize(440, 680)
+    frame.setSize(440, 720)
     frame.setLocationRelativeTo(null)
     frame.isVisible = true
 

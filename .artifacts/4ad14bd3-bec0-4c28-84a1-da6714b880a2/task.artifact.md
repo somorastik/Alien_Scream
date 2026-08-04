@@ -1,0 +1,20 @@
+- `[x]` Update `settings.gradle.kts` (root project name)
+- `[x]` Update `app/build.gradle.kts` (namespace and applicationId)
+- `[x]` Update `strings.xml` (app name)
+- `[x]` Update `themes.xml` (style name)
+- `[x]` Update `AndroidManifest.xml` (theme reference)
+- `[x]` Rename package and move files from `com.alienscreamer.app` to `com.alienscream.app`
+- `[x]` Update package declarations and imports in all Kotlin files
+- `[x]` Update UI text and function names in `MainActivity.kt`
+- `[x]` Update `Main.kt` (JFrame title)
+- `[x]` Cleanup empty directories
+- `[x]` Gradle Sync and Build verification
+- `[x]` Add exit cross to top right corner of Android app
+- `[x]` Add exit button to header of Desktop app
+- `[x]` Configure NDK debug symbols for Play Store publishing
+- `[x]` Bump version to 1.1 (versionCode 2) for Google Play update
+- `[x]` Enable R8 optimization (minification and resource shrinking)
+- `[x]` Bump version to 1.3 (versionCode 3) for Google Play update
+- `[x]` Enable R8 Full Mode and optimized resource shrinking
+- `[x]` Add R8 symbolication keep rules for native crash support
+- `[x]` Bump version to 1.4 (versionCode 4) for Google Play update

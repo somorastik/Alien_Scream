@@ -5,15 +5,15 @@ plugins {
 }
 
 android {
-    namespace = "com.alienscreamer.app"
+    namespace = "com.alienscream.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.alienscreamer.app"
+        applicationId = "com.alienscream.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 4
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -23,11 +23,15 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
 

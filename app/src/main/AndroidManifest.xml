@@ -7,7 +7,7 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_alien_head"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AlienScreamer">
+        android:theme="@style/Theme.AlienScream">
         <activity
             android:name=".MainActivity"
             android:exported="true">
