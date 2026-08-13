@@ -18,3 +18,5 @@
 - `[x]` Enable R8 Full Mode and optimized resource shrinking
 - `[x]` Add R8 symbolication keep rules for native crash support
 - `[x]` Bump version to 1.4 (versionCode 4) for Google Play update
+- `[x]` Bump version to 1.5 (versionCode 5) for Google Play update
+- `[x]` Add persistence for synth configuration using SharedPreferences

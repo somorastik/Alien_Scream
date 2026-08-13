@@ -15,13 +15,16 @@ The project has been successfully renamed from "Alien Screamer" to "Alien Scream
 - **[app/build.gradle.kts](file:///C:/Users/Ableton/IdeaProjects/Alien%20Screamer/app/build.gradle.kts)**:
     - Added `ndk { debugSymbolLevel = "FULL" }` for crash reporting.
     - Enabled **R8 optimization** (minify and shrink resources).
-    - Updated `versionCode` to `4` and `versionName` to `"1.4"`.
+    - Updated `versionCode` to `5` and `versionName` to `"1.5"`.
 - **[gradle.properties](file:///C:/Users/Ableton/IdeaProjects/Alien%20Screamer/gradle.properties)**: Enabled `android.enableR8.fullMode` and `android.r8.optimizedResourceShrinking`.
 - **[proguard-rules.pro](file:///C:/Users/Ableton/IdeaProjects/Alien%20Screamer/app/proguard-rules.pro)**: Added rules to preserve `LineNumberTable`, `SourceFile`, and `Signature` attributes to support native crash symbolication.
 
 ### Source Code
 - **Package Migration**: All files were moved from `com.alienscreamer.app` to `com.alienscream.app`.
 - **Code References**: All package declarations and imports were updated to reflect the new package name.
+- **Persistence**:
+    - Added `SettingsManager` to persist synth configuration (frequencies, modulations, etc.) using `SharedPreferences`.
+    - Integrated persistence into `MainActivity.kt` so that settings are restored on app launch and saved automatically on change.
 - **UI Updates**:
     - Renamed `AlienScreamerApp` to `AlienScreamApp` in `MainActivity.kt`.
     - Updated the header text in the app UI to `"Alien Scream"`.
