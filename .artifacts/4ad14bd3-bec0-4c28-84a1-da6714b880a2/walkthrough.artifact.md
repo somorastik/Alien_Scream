@@ -14,8 +14,9 @@ The project has been successfully renamed from "Alien Screamer" to "Alien Scream
 ### Publishing & Build Optimization
 - **[app/build.gradle.kts](file:///C:/Users/Ableton/IdeaProjects/Alien%20Screamer/app/build.gradle.kts)**:
     - Added `ndk { debugSymbolLevel = "FULL" }` for crash reporting.
+    - Configured `packaging { jniLibs { keepDebugSymbols.add("**/*.so") } }` to ensure debug symbols from dependencies are preserved and included in the App Bundle.
     - Enabled **R8 optimization** (minify and shrink resources).
-    - Updated `versionCode` to `5` and `versionName` to `"1.5"`.
+    - Updated `versionCode` to `7`, `versionName` to `"1.7"`, and updated `compileSdk` and `targetSdk` to `36`.
 - **[gradle.properties](file:///C:/Users/Ableton/IdeaProjects/Alien%20Screamer/gradle.properties)**: Enabled `android.enableR8.fullMode` and `android.r8.optimizedResourceShrinking`.
 - **[proguard-rules.pro](file:///C:/Users/Ableton/IdeaProjects/Alien%20Screamer/app/proguard-rules.pro)**: Added rules to preserve `LineNumberTable`, `SourceFile`, and `Signature` attributes to support native crash symbolication.
 

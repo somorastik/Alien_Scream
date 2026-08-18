@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.alienscream.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.alienscream.app"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 5
-        versionName = "1.5"
+        targetSdk = 36
+        versionCode = 7
+        versionName = "1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -51,6 +51,9 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            keepDebugSymbols.add("**/*.so")
         }
     }
 }

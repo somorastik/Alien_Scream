@@ -19,4 +19,7 @@
 - `[x]` Add R8 symbolication keep rules for native crash support
 - `[x]` Bump version to 1.4 (versionCode 4) for Google Play update
 - `[x]` Bump version to 1.5 (versionCode 5) for Google Play update
+- `[x]` Bump version to 1.6 (versionCode 6) and update SDKs to 36
+- `[x]` Bump version to 1.7 (versionCode 7) for Google Play update
+- `[x]` Ensure NDK symbols are kept during packaging for dependency libraries
 - `[x]` Add persistence for synth configuration using SharedPreferences
