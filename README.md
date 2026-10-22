@@ -11,16 +11,12 @@
 <p align="center">
   <img src="banner.png" alt="Alien Scream Banner" width="100%" />
 </p>
-<p align="center">
-  <img src="app_icon.png" alt="Alien Scream Icon" width="150" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="screenshot_main.jpg" alt="Alien Scream Main Interface" width="250" />
-</p>
 
 
 ---
-
 ## ✨ Features
+
+<img src="screenshot_main.jpg" alt="Alien Scream Main Interface" width="250" align="right" style="float: right; margin-left: 15px; margin-bottom: 10px;" />
 
 - **Oscillator & Waveforms:** Select between standard waveforms including **Sine**, **Triangle**, **Sawtooth**, and **Square** to generate your core sound.
 - **Real-Time Visualizers:**
@@ -33,6 +29,8 @@
   - **Delay:** Built-in delay effect for spacey echo tails.
   - **Reverb:** Ambient reverb processing for deep atmospheric space effects.
   - **Master Volume Control:** Smooth output level control.
+
+<br clear="right" />
 
 ---
 
