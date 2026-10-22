@@ -8,16 +8,15 @@
 ---
 
 ## 📸 Screenshots & Artwork
-
 <p align="center">
   <img src="banner.png" alt="Alien Scream Banner" width="100%" />
 </p>
-
 <p align="center">
-  <img src="assets/app_icon.png" alt="Alien Scream Icon" width="150" />
+  <img src="app_icon.png" alt="Alien Scream Icon" width="150" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="assets/screenshot_main.jpg" alt="Alien Scream Main Interface" width="250" />
+  <img src="screenshot_main.jpg" alt="Alien Scream Main Interface" width="250" />
 </p>
+
 
 ---
 
