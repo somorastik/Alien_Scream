@@ -10,7 +10,7 @@
 ## 📸 Screenshots & Artwork
 
 <p align="center">
-  <img src="assets/banner.png" alt="Alien Scream Banner" width="100%" />
+  <img src="banner.png" alt="Alien Scream Banner" width="100%" />
 </p>
 
 <p align="center">
